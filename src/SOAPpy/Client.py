@@ -150,9 +150,11 @@ class HTTPWithTimeout(HTTP):
 class HTTPTransport:
             
 
-    def __init__(self):
+    def __init__(self, **kw):
         self.cookies = Cookie.SimpleCookie();
-
+        self.username = kw.get('username', None)
+        self.password = kw.get('password', None)
+        
     def getNS(self, original_namespace, data):
         """Extract the (possibly extended) namespace from the returned
         SOAP message."""
@@ -189,7 +191,10 @@ class HTTPTransport:
 
         if not isinstance(addr, SOAPAddress):
             addr = SOAPAddress(addr, config)
-
+        
+        if addr.user==None and self.username:
+            addr.user = "%s:%s" % (self.username, self.password)
+            
         # Build a request
         if http_proxy:
             real_addr = http_proxy
@@ -341,7 +346,8 @@ class SOAPProxy:
                  header = None, methodattrs = None, transport = HTTPTransport,
                  encoding = 'UTF-8', throw_faults = 1, unwrap_results = None,
                  http_proxy=None, config = Config, noroot = 0,
-                 simplify_objects=None, timeout=None):
+                 simplify_objects=None, timeout=None, 
+                 username=None, password=None):
 
         # Test the encoding, raising an exception if it's not known
         if encoding != None:
@@ -364,14 +370,16 @@ class SOAPProxy:
         self.soapaction     = soapaction
         self.header         = header
         self.methodattrs    = methodattrs
-        self.transport      = transport()
+        self.transport      = transport(username=username, password=password)
         self.encoding       = encoding
         self.throw_faults   = throw_faults
         self.http_proxy     = http_proxy
         self.config         = config
         self.noroot         = noroot
         self.timeout        = timeout
-
+        self.username       = username
+        self.password       = password
+        
         # GSI Additions
         if hasattr(config, "channel_mode") and \
                hasattr(config, "delegation_mode"):
