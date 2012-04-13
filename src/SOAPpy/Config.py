@@ -75,6 +75,7 @@ class SOAPConfig:
             # schemaNamespace, and schemaNamespaceURI
             self.namespaceStyle = '1999'
             self.strictNamespaces = 0
+            self.looseNamespaces = 0 # Even looser than 'strictNamespaces = 0'
             self.typed = 1
             self.buildWithNamespacePrefix = 1
             self.returnAllAttrs = 0
@@ -143,10 +144,14 @@ class SOAPConfig:
             if d['SSLclient'] or d['SSLserver']:
                 d['SSL'] = self.SSLconfig()
 
+        
         for k, v in kw.items():
             if k[0] != '_':
                 setattr(self, k, v)
 
+        if self.strictNamespaces and self.looseNamespaces:
+            raise ValueError, "Only one of strictNamespaces and looseNamespaces can be true"
+            
     def __setattr__(self, name, value):
         if name in self.__readonly:
             raise AttributeError, "readonly configuration setting"
