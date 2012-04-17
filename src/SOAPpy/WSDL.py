@@ -36,7 +36,6 @@ class Proxy:
 
     def __init__(self, wsdlsource, config=Config, **kw ):
 
-        print config.looseNamespaces
         if config.looseNamespaces:
             wstools.Utility.DOM.looseNamespaces = True
             
